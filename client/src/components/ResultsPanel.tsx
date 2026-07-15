@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { exportHtmlReport, exportJsonReport } from '../services/reportExport'
 import type { Impact, ScanIssue, ScanResult } from '../types/scan'
+import { PriorityPanel } from './PriorityPanel'
 
 const labels: Record<Impact, string> = { critical: 'Critical', serious: 'Serious', moderate: 'Moderate', minor: 'Minor' }
 const filters: Array<'all' | Impact> = ['all', 'critical', 'serious', 'moderate', 'minor']
@@ -15,7 +16,7 @@ function resultTitle(url: string): string {
 function IssueCard({ issue }: { issue: ScanIssue }) {
   const [open, setOpen] = useState(false)
   return (
-    <article className={`issue-card impact-${issue.impact}`}>
+    <article className={`issue-card impact-${issue.impact}`} id={`issue-${issue.id}`}>
       <button className="issue-summary" type="button" onClick={() => setOpen(!open)} aria-expanded={open}>
         <span className="impact-mark" aria-hidden="true">!</span>
         <span className="issue-heading"><strong>{issue.title}</strong><small>Rule: {issue.id} · WCAG {issue.wcag.join(', ') || '관련 기준 확인 필요'}</small></span>
@@ -43,6 +44,14 @@ function IssueCard({ issue }: { issue: ScanIssue }) {
 export function ResultsPanel({ result, onRescan, loading }: { result: ScanResult; onRescan: () => void; loading: boolean }) {
   const [filter, setFilter] = useState<'all' | Impact>('all')
   const visibleIssues = useMemo(() => filter === 'all' ? result.issues : result.issues.filter((issue) => issue.impact === filter), [filter, result.issues])
+  function selectPriority(issueId: string) {
+    setFilter('all')
+    window.setTimeout(() => {
+      const issue = document.getElementById(`issue-${issueId}`)
+      issue?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      issue?.querySelector<HTMLButtonElement>('.issue-summary')?.focus({ preventScroll: true })
+    }, 0)
+  }
   return (
     <section className="results-shell" id="results" aria-labelledby="results-title">
       <header className="results-header">
@@ -66,6 +75,7 @@ export function ResultsPanel({ result, onRescan, loading }: { result: ScanResult
         </aside>
         <div className="issues-panel">
           <div className="issues-top"><div><span className="panel-label">발견된 문제</span><h3>{result.summary.total}개의 개선 항목</h3></div></div>
+          <PriorityPanel issues={result.issues} onSelect={selectPriority} />
           <div className="filter-row" aria-label="심각도 필터">
             {filters.map((item) => <button type="button" className={filter === item ? 'active' : ''} onClick={() => setFilter(item)} key={item}>{item === 'all' ? '전체' : labels[item]} <span>{item === 'all' ? result.summary.total : result.summary[item]}</span></button>)}
           </div>
