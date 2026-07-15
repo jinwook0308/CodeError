@@ -1,5 +1,6 @@
 import cors from "cors";
 import express from "express";
+import { afterDemoPage, beforeDemoPage } from "./data/demoPages.js";
 import { scanRouter } from "./routes/scan.js";
 
 const app = express();
@@ -12,6 +13,8 @@ app.use(express.json({ limit: "10kb" }));
 app.get("/api/health", (_request, response) => {
   response.json({ status: "ok" });
 });
+app.get("/demo/before", (_request, response) => response.type("html").send(beforeDemoPage));
+app.get("/demo/after", (_request, response) => response.type("html").send(afterDemoPage));
 app.use("/api/scan", scanRouter);
 
 app.listen(port, () => {

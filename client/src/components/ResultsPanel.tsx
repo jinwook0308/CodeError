@@ -5,6 +5,13 @@ import type { Impact, ScanIssue, ScanResult } from '../types/scan'
 const labels: Record<Impact, string> = { critical: 'Critical', serious: 'Serious', moderate: 'Moderate', minor: 'Minor' }
 const filters: Array<'all' | Impact> = ['all', 'critical', 'serious', 'moderate', 'minor']
 
+function resultTitle(url: string): string {
+  const parsed = new URL(url)
+  if (parsed.pathname === '/demo/before') return '수정 전 시연 페이지'
+  if (parsed.pathname === '/demo/after') return '수정 후 시연 페이지'
+  return parsed.hostname
+}
+
 function IssueCard({ issue }: { issue: ScanIssue }) {
   const [open, setOpen] = useState(false)
   return (
@@ -39,7 +46,7 @@ export function ResultsPanel({ result, onRescan, loading }: { result: ScanResult
   return (
     <section className="results-shell" id="results" aria-labelledby="results-title">
       <header className="results-header">
-        <div><span className="eyebrow">검사 결과</span><h2 id="results-title">{new URL(result.url).hostname}</h2><p>{result.url} · {new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'medium' }).format(new Date(result.scannedAt))}</p></div>
+        <div><span className="eyebrow">검사 결과</span><h2 id="results-title">{resultTitle(result.url)}</h2><p>{result.url} · {new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium', timeStyle: 'medium' }).format(new Date(result.scannedAt))}</p></div>
         <div className="result-actions">
           <button type="button" className="export-button" onClick={() => exportJsonReport(result)} disabled={loading}><span aria-hidden="true">↓</span> JSON</button>
           <button type="button" className="export-button primary" onClick={() => exportHtmlReport(result)} disabled={loading}><span aria-hidden="true">↓</span> HTML 리포트</button>

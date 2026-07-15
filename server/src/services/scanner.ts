@@ -12,9 +12,14 @@ function wcagFromTags(tags: string[]): string[] {
     .map((tag) => tag.slice(4).split("").join("."));
 }
 
-export async function scanWebsite(input: unknown): Promise<ScanResponse> {
+interface ScanOptions {
+  trustedHostnames?: string[];
+}
+
+export async function scanWebsite(input: unknown, options: ScanOptions = {}): Promise<ScanResponse> {
   const targetUrl = normalizeUrl(input);
-  await assertPublicHostname(targetUrl.hostname);
+  const trustedHostnames = new Set(options.trustedHostnames ?? []);
+  if (!trustedHostnames.has(targetUrl.hostname)) await assertPublicHostname(targetUrl.hostname);
   let browser: Browser | undefined;
 
   try {
@@ -24,6 +29,7 @@ export async function scanWebsite(input: unknown): Promise<ScanResponse> {
     await context.route("**/*", async (route) => {
       const requestUrl = new URL(route.request().url());
       if (!["http:", "https:"].includes(requestUrl.protocol)) return route.continue();
+      if (trustedHostnames.has(requestUrl.hostname)) return route.continue();
       const check = checkedHosts.get(requestUrl.hostname) ?? assertPublicHostname(requestUrl.hostname);
       checkedHosts.set(requestUrl.hostname, check);
       try { await check; await route.continue(); } catch { await route.abort("blockedbyclient"); }

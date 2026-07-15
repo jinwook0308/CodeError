@@ -91,6 +91,15 @@ const guides: AccessibilityGuide[] = [
     exampleBefore: '<div class="content">...</div>',
     exampleAfter: '<main class="content">...</main>',
   },
+  {
+    ruleId: "region",
+    title: "일부 콘텐츠가 랜드마크 영역 밖에 있습니다",
+    description: "랜드마크 밖의 콘텐츠는 스크린 리더 사용자가 영역 단위로 페이지를 탐색할 때 찾기 어렵습니다.",
+    solution: "페이지의 주요 콘텐츠를 header, nav, main, aside, footer 같은 의미 있는 랜드마크 요소 안에 배치하세요.",
+    wcag: ["1.3.1"],
+    exampleBefore: '<div class="content">...</div>',
+    exampleAfter: '<main class="content">...</main>',
+  },
 ];
 
 export const accessibilityGuides = new Map(guides.map((guide) => [guide.ruleId, guide]));

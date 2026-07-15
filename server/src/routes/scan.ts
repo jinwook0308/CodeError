@@ -1,14 +1,17 @@
-import { Router } from "express";
+import { Router, type Response } from "express";
 import { scanWebsite } from "../services/scanner.js";
 
 export const scanRouter = Router();
 let scanInProgress = false;
 
-scanRouter.post("/", async (request, response) => {
-  if (scanInProgress) return response.status(429).json({ success: false, message: "다른 검사가 진행 중입니다. 잠시 후 다시 시도해주세요." });
+async function respondWithScan(response: Response, scan: () => ReturnType<typeof scanWebsite>): Promise<void> {
+  if (scanInProgress) {
+    response.status(429).json({ success: false, message: "다른 검사가 진행 중입니다. 잠시 후 다시 시도해주세요." });
+    return;
+  }
   scanInProgress = true;
   try {
-    response.json(await scanWebsite(request.body?.url));
+    response.json(await scan());
   } catch (error) {
     const rawMessage = error instanceof Error ? error.message : "";
     const isInputError = /입력|URL|http|사설|로컬|2,048|사용자 정보/.test(rawMessage);
@@ -22,4 +25,18 @@ scanRouter.post("/", async (request, response) => {
   } finally {
     scanInProgress = false;
   }
+}
+
+scanRouter.post("/", async (request, response) => {
+  await respondWithScan(response, () => scanWebsite(request.body?.url));
+});
+
+scanRouter.post("/demo/:variant", async (request, response) => {
+  const variant = request.params.variant;
+  if (variant !== "before" && variant !== "after") {
+    response.status(404).json({ success: false, message: "존재하지 않는 시연 페이지입니다." });
+    return;
+  }
+  const demoUrl = `http://127.0.0.1:3001/demo/${variant}`;
+  await respondWithScan(response, () => scanWebsite(demoUrl, { trustedHostnames: ["127.0.0.1"] }));
 });

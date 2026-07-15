@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { HeroGraphic } from '../components/HeroGraphic'
+import { DemoPanel } from '../components/DemoPanel'
 import { ResultsPanel } from '../components/ResultsPanel'
 import { ScanForm } from '../components/ScanForm'
-import { requestScan } from '../services/scanApi'
+import { requestDemoScan, requestScan } from '../services/scanApi'
 import type { ScanResult } from '../types/scan'
 
 const loadingSteps = ['웹사이트를 불러오는 중입니다...', '접근성 규칙을 검사하고 있습니다...', '검사 결과를 정리하고 있습니다...']
@@ -13,6 +14,7 @@ export function HomePage() {
   const [step, setStep] = useState(0)
   const [error, setError] = useState('')
   const [result, setResult] = useState<ScanResult | null>(null)
+  const [lastScan, setLastScan] = useState<'url' | 'before' | 'after'>('url')
   const resultsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -21,15 +23,16 @@ export function HomePage() {
     return () => window.clearInterval(timer)
   }, [loading])
 
-  async function scan() {
-    if (loading || !url.trim()) return
+  async function runScan(scanRequest: () => Promise<ScanResult>, kind: 'url' | 'before' | 'after') {
+    if (loading) return
     setLoading(true)
     setStep(0)
     setError('')
     try {
-      const data = await requestScan(url)
+      const data = await scanRequest()
       setResult(data)
-      setUrl(data.url)
+      setLastScan(kind)
+      if (kind === 'url') setUrl(data.url)
       window.setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : '검사 중 오류가 발생했습니다.')
@@ -38,12 +41,26 @@ export function HomePage() {
     }
   }
 
+  async function scan() {
+    if (!url.trim()) return
+    await runScan(() => requestScan(url), 'url')
+  }
+
+  async function scanDemo(variant: 'before' | 'after') {
+    await runScan(() => requestDemoScan(variant), variant)
+  }
+
+  async function rescan() {
+    if (lastScan === 'url') await scan()
+    else await scanDemo(lastScan)
+  }
+
   return (
     <main>
       <div className="hero-background">
         <nav className="top-nav" aria-label="주요 메뉴">
           <a className="brand" href="#top" aria-label="CodeError 홈"><strong>Code<span>Error</span></strong><small>WEB ACCESSIBILITY CHECKER</small></a>
-          <div className="nav-links"><a href="#about">프로젝트 소개</a><a href="#open-source">오픈소스</a><a href="https://github.com" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a></div>
+          <div className="nav-links"><a href="#about">프로젝트 소개</a><a href="#demo">실제 시연</a><a href="https://github.com/jinwook0308/CodeError" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a></div>
         </nav>
         <section className="hero" id="top">
           <div className="hero-copy">
@@ -56,8 +73,9 @@ export function HomePage() {
           <HeroGraphic />
         </section>
       </div>
+      <div className="demo-wrap"><DemoPanel loading={loading} onScan={scanDemo} /></div>
       <div ref={resultsRef} className="content-wrap">
-        {result ? <ResultsPanel result={result} onRescan={scan} loading={loading} /> : (
+        {result ? <ResultsPanel result={result} onRescan={rescan} loading={loading} /> : (
           <section className="empty-state" id="about"><div className="empty-icon"><span>✓</span></div><div><span className="eyebrow">실제 axe-core 자동 검사</span><h2>URL을 입력하면 개선할 접근성 문제를 찾아드려요</h2><p>검사 결과에서 문제의 원인, 해당 HTML 요소, WCAG 기준과 바로 적용할 수 있는 수정 예시를 확인할 수 있습니다.</p></div><div className="empty-steps"><span><b>01</b> URL 입력</span><i /><span><b>02</b> 자동 검사</span><i /><span><b>03</b> 수정 가이드</span></div></section>
         )}
       </div>
