@@ -20,3 +20,11 @@ export interface ScanResult {
   summary: Record<Impact, number> & { total: number; passes: number }
   issues: ScanIssue[]
 }
+
+export type ScanKind = 'url' | 'before' | 'after'
+
+export interface ScanHistoryItem {
+  id: string
+  kind: ScanKind
+  result: ScanResult
+}
