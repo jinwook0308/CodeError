@@ -5,6 +5,8 @@ import { PriorityPanel } from './PriorityPanel'
 
 const labels: Record<Impact, string> = { critical: 'Critical', serious: 'Serious', moderate: 'Moderate', minor: 'Minor' }
 const filters: Array<'all' | Impact> = ['all', 'critical', 'serious', 'moderate', 'minor']
+const impactRank: Record<Impact, number> = { critical: 4, serious: 3, moderate: 2, minor: 1 }
+type SortMode = 'severity' | 'nodes' | 'name'
 
 function resultTitle(url: string): string {
   const parsed = new URL(url)
@@ -43,9 +45,30 @@ function IssueCard({ issue }: { issue: ScanIssue }) {
 
 export function ResultsPanel({ result, onRescan, loading }: { result: ScanResult; onRescan: () => void; loading: boolean }) {
   const [filter, setFilter] = useState<'all' | Impact>('all')
-  const visibleIssues = useMemo(() => filter === 'all' ? result.issues : result.issues.filter((issue) => issue.impact === filter), [filter, result.issues])
+  const [query, setQuery] = useState('')
+  const [sort, setSort] = useState<SortMode>('severity')
+  const visibleIssues = useMemo(() => {
+    const normalizedQuery = query.trim().toLocaleLowerCase('ko')
+    const filteredIssues = result.issues.filter((issue) => {
+      if (filter !== 'all' && issue.impact !== filter) return false
+      if (!normalizedQuery) return true
+
+      const searchableText = [issue.title, issue.id, issue.wcag.join(' '), issue.description]
+        .join(' ')
+        .toLocaleLowerCase('ko')
+      return searchableText.includes(normalizedQuery)
+    })
+
+    return [...filteredIssues].sort((first, second) => {
+      if (sort === 'nodes') return second.nodes.length - first.nodes.length || impactRank[second.impact] - impactRank[first.impact]
+      if (sort === 'name') return first.title.localeCompare(second.title, 'ko')
+      return impactRank[second.impact] - impactRank[first.impact] || second.nodes.length - first.nodes.length
+    })
+  }, [filter, query, result.issues, sort])
+
   function selectPriority(issueId: string) {
     setFilter('all')
+    setQuery('')
     window.setTimeout(() => {
       const issue = document.getElementById(`issue-${issueId}`)
       issue?.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -79,8 +102,31 @@ export function ResultsPanel({ result, onRescan, loading }: { result: ScanResult
           <div className="filter-row" aria-label="심각도 필터">
             {filters.map((item) => <button type="button" className={filter === item ? 'active' : ''} onClick={() => setFilter(item)} key={item}>{item === 'all' ? '전체' : labels[item]} <span>{item === 'all' ? result.summary.total : result.summary[item]}</span></button>)}
           </div>
+          <div className="issue-tools">
+            <div className="issue-search">
+              <label className="sr-only" htmlFor="issue-search">검사 결과 검색</label>
+              <span aria-hidden="true">⌕</span>
+              <input
+                id="issue-search"
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="문제 제목, Rule ID, WCAG 검색"
+              />
+              {query && <button type="button" onClick={() => setQuery('')} aria-label="검색어 지우기">×</button>}
+            </div>
+            <label className="sort-control">
+              <span>정렬</span>
+              <select value={sort} onChange={(event) => setSort(event.target.value as SortMode)}>
+                <option value="severity">심각도 높은 순</option>
+                <option value="nodes">영향 요소 많은 순</option>
+                <option value="name">규칙 이름순</option>
+              </select>
+            </label>
+            <p className="visible-count" aria-live="polite">{visibleIssues.length}개 표시</p>
+          </div>
           <div className="issue-list">
-            {visibleIssues.length ? visibleIssues.map((issue) => <IssueCard key={issue.id} issue={issue} />) : <div className="empty-filter"><span>✓</span><p>이 심각도에서 발견된 문제가 없습니다.</p></div>}
+            {visibleIssues.length ? visibleIssues.map((issue) => <IssueCard key={issue.id} issue={issue} />) : <div className="empty-filter"><span>✓</span><p>{query ? '검색 조건에 맞는 문제가 없습니다.' : '이 심각도에서 발견된 문제가 없습니다.'}</p></div>}
           </div>
         </div>
       </div>

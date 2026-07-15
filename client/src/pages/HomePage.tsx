@@ -75,7 +75,7 @@ export function HomePage() {
       </div>
       <div className="demo-wrap"><DemoPanel loading={loading} onScan={scanDemo} /></div>
       <div ref={resultsRef} className="content-wrap">
-        {result ? <ResultsPanel result={result} onRescan={rescan} loading={loading} /> : (
+        {result ? <ResultsPanel key={result.scannedAt} result={result} onRescan={rescan} loading={loading} /> : (
           <section className="empty-state" id="about"><div className="empty-icon"><span>✓</span></div><div><span className="eyebrow">실제 axe-core 자동 검사</span><h2>URL을 입력하면 개선할 접근성 문제를 찾아드려요</h2><p>검사 결과에서 문제의 원인, 해당 HTML 요소, WCAG 기준과 바로 적용할 수 있는 수정 예시를 확인할 수 있습니다.</p></div><div className="empty-steps"><span><b>01</b> URL 입력</span><i /><span><b>02</b> 자동 검사</span><i /><span><b>03</b> 수정 가이드</span></div></section>
         )}
       </div>
