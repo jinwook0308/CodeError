@@ -1,0 +1,29 @@
+{
+  "name": "codeerror-server",
+  "version": "1.0.0",
+  "description": "CodeError accessibility scan API",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "playwright": "^1.61.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.1.1",
+    "tsx": "^4.23.1",
+    "typescript": "^7.0.2"
+  }
+}
