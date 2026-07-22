@@ -5,7 +5,7 @@ import { HistoryDialog } from '../components/HistoryDialog'
 import { ResultsPanel } from '../components/ResultsPanel'
 import { ScanForm } from '../components/ScanForm'
 import { addScanHistory, clearScanHistory, deleteScanHistory, loadScanHistory } from '../services/scanHistory'
-import { requestDemoScan, requestScan } from '../services/scanApi'
+import { isLocalScanTarget, requestDemoScan, requestLatestLocalScan, requestScan } from '../services/scanApi'
 import type { ScanHistoryItem, ScanKind, ScanResult } from '../types/scan'
 
 const loadingSteps = ['웹사이트를 불러오는 중입니다...', '접근성 규칙을 검사하고 있습니다...', '검사 결과를 정리하고 있습니다...']
@@ -37,7 +37,7 @@ export function HomePage() {
       setResult(data)
       setLastScan(kind)
       setHistory(addScanHistory(data, kind))
-      if (kind === 'url') setUrl(data.url)
+      if (kind === 'url' || kind === 'local') setUrl(data.url)
       window.setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : '검사 중 오류가 발생했습니다.')
@@ -48,15 +48,19 @@ export function HomePage() {
 
   async function scan() {
     if (!url.trim()) return
-    await runScan(() => requestScan(url), 'url')
+    await runScan(() => requestScan(url), isLocalScanTarget(url) ? 'local' : 'url')
   }
 
   async function scanDemo(variant: 'before' | 'after') {
     await runScan(() => requestDemoScan(variant), variant)
   }
 
+  async function openLocalResult() {
+    await runScan(requestLatestLocalScan, 'local')
+  }
+
   async function rescan() {
-    if (lastScan === 'url') await scan()
+    if (lastScan === 'url' || lastScan === 'local') await scan()
     else await scanDemo(lastScan)
   }
 
@@ -94,6 +98,10 @@ export function HomePage() {
             <h1>웹 <em>접근성</em> 문제,<br />몇 초 만에 확인하세요</h1>
             <p>WCAG 기반 자동 검사로 웹사이트의 접근성 문제를 찾고,<br />초보 개발자도 이해할 수 있는 한국어 설명과 수정 방법을 제공합니다.</p>
             <ScanForm url={url} loading={loading} status={loadingSteps[step]} error={error} onUrlChange={(value) => { setUrl(value); setError('') }} onSubmit={scan} />
+            <div className="local-result-callout">
+              <div><strong>localhost도 위 입력창에서 바로 검사할 수 있어요.</strong><span>터미널로 검사한 결과가 있다면 오른쪽 버튼으로 다시 열 수 있어요.</span></div>
+              <button type="button" onClick={openLocalResult} disabled={loading}>저장된 로컬 결과 열기 <span aria-hidden="true">→</span></button>
+            </div>
             <div className="badge-row" id="open-source"><span>◈ WCAG 기반 검사</span><span>⌘ axe-core 엔진</span><span>&lt;/&gt; 한국어 수정 가이드</span><span>♧ 오픈소스</span></div>
           </div>
           <HeroGraphic />

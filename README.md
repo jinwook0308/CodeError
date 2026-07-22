@@ -20,6 +20,7 @@ URL을 입력하면 서버가 Playwright Chromium으로 페이지를 열고 axe-
 - 실제 검사 결과를 현재 브라우저에 최대 10개까지 저장하고 이전 결과를 다시 여는 검사 기록
 - 잘못된 URL, 접속 실패, HTTPS 오류, 타임아웃의 사용자 친화적 처리
 - localhost, IP literal 및 DNS가 사설 IP로 해석되는 대상 차단
+- 사용자 PC에서 `localhost`, `127.0.0.1`, `::1` 화면을 검사하는 Local Runner CLI
 - 검사 성공·실패와 관계없이 Playwright 브라우저 종료
 
 ## 기술 스택
@@ -32,6 +33,7 @@ URL을 입력하면 서버가 Playwright Chromium으로 페이지를 열고 axe-
 
 ```text
 CodeError/
+├─ package.json
 ├─ client/
 │  ├─ src/
 │  │  ├─ components/
@@ -45,6 +47,7 @@ CodeError/
 │  └─ vite.config.ts
 ├─ server/
 │  ├─ src/
+│  │  ├─ cli/
 │  │  ├─ data/
 │  │  ├─ routes/
 │  │  ├─ services/
@@ -63,10 +66,10 @@ Node.js LTS와 npm이 필요합니다.
 
 ```powershell
 cd CodeError\client
-npm install
+npm ci
 
 cd ..\server
-npm install
+npm ci
 npx playwright install chromium
 ```
 
@@ -90,6 +93,61 @@ npm run dev
 
 브라우저에서 `http://localhost:5173`을 열고 공개 웹사이트 URL을 입력합니다. 서버는 `http://localhost:3001`에서 실행되며 Vite가 `/api` 요청을 프록시합니다.
 
+## localhost 검사 (Local Runner)
+
+Local Runner는 사용자의 PC에서 실행 중인 개발 화면을 직접 검사합니다. 소스 코드를 업로드하지 않고 렌더링된 화면에 Playwright와 axe-core를 실행합니다.
+
+### 사이트 입력창에서 바로 검사
+
+검사할 프로젝트와 CodeError 백엔드·클라이언트를 모두 실행한 뒤 CodeError 입력창에 로컬 주소를 입력합니다.
+
+```text
+http://localhost:5173
+```
+
+**검사 시작**을 누르면 CodeError가 공개 URL과 localhost를 자동으로 구분합니다. localhost 검사는 사용자 PC의 개발 모드에서만 허용되며, 배포된 공개 서버에서는 보안을 위해 차단됩니다.
+
+검사 대상 프로젝트가 `5173` 포트를 사용한다면 CodeError 클라이언트는 다른 포트로 실행합니다.
+
+```powershell
+cd CodeError\client
+npm run dev -- --port 5174
+```
+
+CodeError 백엔드도 실행해야 합니다.
+
+```powershell
+cd CodeError\server
+npm run dev
+```
+
+이제 `http://localhost:5174`의 CodeError 입력창에 `http://localhost:5173`을 입력해 검사합니다.
+
+### 터미널에서 검사 (선택)
+
+먼저 검사할 프로젝트의 개발 서버를 실행합니다.
+
+```powershell
+npm run dev
+```
+
+다른 PowerShell에서 CodeError 저장소의 최상위 폴더로 이동한 뒤 실행합니다.
+
+```powershell
+cd CodeError
+npm run scan:local -- http://localhost:5173
+```
+
+프로토콜은 생략할 수 있습니다.
+
+```powershell
+npm run scan:local -- localhost:5173
+```
+
+검사가 끝나면 터미널에 참고 점수, 심각도별 개수, 통과 규칙, 문제 요소와 한국어 수정 가이드가 표시됩니다. 결과는 `server/.codeerror/latest-local-scan.json`에도 저장됩니다. CodeError 사이트에서 **로컬 검사 결과 열기** 버튼을 누르면 같은 결과를 기존 결과 UI에서 확인할 수 있습니다.
+
+이 경우 CodeError 사이트에서 **저장된 로컬 결과 열기**를 누르면 터미널 검사 결과도 다시 확인할 수 있습니다. Local Runner는 보안을 위해 `localhost`, `127.0.0.1`, `::1`만 허용합니다.
+
 ## 수정 전·후 비교 시연
 
 홈 화면의 **실제 axe-core 비교 시연** 영역에서 다음 버튼을 사용할 수 있습니다.
@@ -107,6 +165,7 @@ npm run dev
 ```powershell
 cd CodeError\server
 npm run typecheck
+npm run test:local
 npm run build
 
 cd ..\client
@@ -141,6 +200,7 @@ npm run build
 ## 현재 범위와 제한
 
 - 입력한 URL의 첫 페이지 하나만 검사합니다.
+- Local Runner 결과는 터미널과 웹 결과 UI에서 확인할 수 있으며 수정 전후 자동 비교는 다음 단계입니다.
 - 로그인, 데이터베이스, PDF, AI 수정, GitHub 연동은 구현하지 않았습니다.
 - axe-core 자동 검사는 수동 접근성 평가 전체를 대체하지 않습니다.
 - 리디렉션 및 하위 리소스 요청도 사설 주소를 차단하지만, 공개 DNS 환경과 네트워크 정책에 따라 접속 결과가 달라질 수 있습니다.

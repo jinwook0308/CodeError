@@ -35,7 +35,7 @@ function isScanResult(value: unknown): value is ScanResult {
 
 function isHistoryItem(value: unknown): value is ScanHistoryItem {
   if (!isObject(value) || typeof value.id !== 'string') return false
-  if (!['url', 'before', 'after'].includes(value.kind as string)) return false
+  if (!['url', 'before', 'after', 'local'].includes(value.kind as string)) return false
   return isScanResult(value.result)
 }
 

@@ -1,19 +1,36 @@
 import type { ScanResult } from '../types/scan'
 
+const localHostnames = new Set(['localhost', '127.0.0.1', '::1', '[::1]'])
+
+export function isLocalScanTarget(input: string): boolean {
+  const value = input.trim()
+  if (!value) return false
+  const candidate = /^[a-z][a-z\d+.-]*:\/\//i.test(value) ? value : `http://${value}`
+  try {
+    return localHostnames.has(new URL(candidate).hostname.toLowerCase())
+  } catch {
+    return false
+  }
+}
+
 export async function requestScan(url: string): Promise<ScanResult> {
-  return request('/api/scan', { url })
+  return request(isLocalScanTarget(url) ? '/api/scan/local' : '/api/scan', { url })
 }
 
 export async function requestDemoScan(variant: 'before' | 'after'): Promise<ScanResult> {
   return request(`/api/scan/demo/${variant}`)
 }
 
-async function request(endpoint: string, body?: { url: string }): Promise<ScanResult> {
+export async function requestLatestLocalScan(): Promise<ScanResult> {
+  return request('/api/scan/local/latest', undefined, 'GET')
+}
+
+async function request(endpoint: string, body?: { url: string }, method = 'POST'): Promise<ScanResult> {
   let response: Response
   try {
     response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method,
+      headers: body ? { 'Content-Type': 'application/json' } : undefined,
       body: body ? JSON.stringify(body) : undefined,
     })
   } catch {

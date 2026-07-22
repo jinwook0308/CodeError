@@ -21,7 +21,7 @@ export interface ScanResult {
   issues: ScanIssue[]
 }
 
-export type ScanKind = 'url' | 'before' | 'after'
+export type ScanKind = 'url' | 'before' | 'after' | 'local'
 
 export interface ScanHistoryItem {
   id: string

@@ -43,7 +43,7 @@ function IssueCard({ issue }: { issue: ScanIssue }) {
   )
 }
 
-export function ResultsPanel({ result, onRescan, loading }: { result: ScanResult; onRescan: () => void; loading: boolean }) {
+export function ResultsPanel({ result, onRescan, loading, rescanLabel = '다시 검사' }: { result: ScanResult; onRescan: () => void; loading: boolean; rescanLabel?: string }) {
   const [filter, setFilter] = useState<'all' | Impact>('all')
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortMode>('severity')
@@ -82,7 +82,7 @@ export function ResultsPanel({ result, onRescan, loading }: { result: ScanResult
         <div className="result-actions">
           <button type="button" className="export-button" onClick={() => exportJsonReport(result)} disabled={loading}><span aria-hidden="true">↓</span> JSON</button>
           <button type="button" className="export-button primary" onClick={() => exportHtmlReport(result)} disabled={loading}><span aria-hidden="true">↓</span> HTML 리포트</button>
-          <button type="button" className="rescan-button" onClick={onRescan} disabled={loading}><span aria-hidden="true">↻</span> 다시 검사</button>
+          <button type="button" className="rescan-button" onClick={onRescan} disabled={loading}><span aria-hidden="true">↻</span> {rescanLabel}</button>
         </div>
       </header>
       <div className="results-grid">

@@ -1,4 +1,6 @@
 import { Router, type Response } from "express";
+import { isLoopbackAddress, normalizeLocalUrl } from "../services/localUrlSafety.js";
+import { loadLocalScanResult, saveLocalScanResult } from "../services/localScanStore.js";
 import { scanWebsite } from "../services/scanner.js";
 
 export const scanRouter = Router();
@@ -29,6 +31,39 @@ async function respondWithScan(response: Response, scan: () => ReturnType<typeof
 
 scanRouter.post("/", async (request, response) => {
   await respondWithScan(response, () => scanWebsite(request.body?.url));
+});
+
+scanRouter.post("/local", async (request, response) => {
+  if (process.env.NODE_ENV === "production" || !isLoopbackAddress(request.socket.remoteAddress)) {
+    response.status(403).json({
+      success: false,
+      message: "localhost 검사는 사용자 PC에서 실행 중인 CodeError 개발 서버에서만 사용할 수 있습니다.",
+    });
+    return;
+  }
+
+  await respondWithScan(response, async () => {
+    const target = normalizeLocalUrl(request.body?.url);
+    const result = await scanWebsite(target.href, { trustedHostnames: [target.hostname] });
+    await saveLocalScanResult(result);
+    return result;
+  });
+});
+
+scanRouter.get("/local/latest", async (_request, response) => {
+  try {
+    const result = await loadLocalScanResult();
+    if (!result) {
+      response.status(404).json({
+        success: false,
+        message: "아직 로컬 검사 결과가 없습니다. 먼저 npm run scan:local -- localhost:포트를 실행해주세요.",
+      });
+      return;
+    }
+    response.json(result);
+  } catch {
+    response.status(500).json({ success: false, message: "저장된 로컬 검사 결과를 불러오지 못했습니다." });
+  }
 });
 
 scanRouter.post("/demo/:variant", async (request, response) => {

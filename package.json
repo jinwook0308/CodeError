@@ -1,0 +1,10 @@
+{
+  "name": "codeerror",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "scan:local": "npm --prefix server run scan:local --",
+    "test:local": "npm --prefix server run test:local"
+  }
+}
+
