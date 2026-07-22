@@ -1,6 +1,6 @@
 export function HeroGraphic() {
   return (
-    <div className="hero-visual" aria-label="CodeError 접근성 검사 결과 예시 그래픽">
+    <div className="hero-visual" role="img" aria-label="CodeError 접근성 검사 결과 예시 그래픽">
       <div className="browser-card" aria-hidden="true">
         <div className="browser-bar"><i /><i /><i /></div>
         <div className="visual-body">
