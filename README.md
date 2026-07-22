@@ -1,6 +1,7 @@
 # CodeError
 
-CodeError는 웹 접근성에 익숙하지 않은 개발자를 위한 오픈소스 웹 접근성 자동 검사 및 한국어 수정 가이드 MVP입니다. URL을 입력하면 서버가 Playwright Chromium으로 페이지를 열고 axe-core 검사를 수행한 뒤, 문제의 원인·대상 요소·WCAG 기준·수정 예시를 보여줍니다.
+CodeError는 웹 접근성에 익숙하지 않은 개발자를 위한 오픈소스 웹 접근성 자동 검사 및 한국어 수정 가이드 MVP입니다. 
+URL을 입력하면 서버가 Playwright Chromium으로 페이지를 열고 axe-core 검사를 수행한 뒤, 문제의 원인·대상 요소·WCAG 기준·수정 예시를 보여줍니다.
 
 > 화면의 점수는 CodeError의 자동 검사 결과를 바탕으로 계산한 참고용 점수이며 공식 WCAG 적합성 인증 점수가 아닙니다.
 
