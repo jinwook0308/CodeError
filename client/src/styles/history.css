@@ -5,7 +5,7 @@
   border: 1px solid #d9ddea;
   border-radius: 9px;
   padding: 9px 12px;
-  background: rgba(255, 255, 255, .78);
+  background: rgba(255, 255, 255, 0.78);
   color: #344054;
   font-size: 13px;
   font-weight: 700;
@@ -37,11 +37,11 @@
   border-radius: 20px;
   padding: 0;
   color: #172033;
-  box-shadow: 0 30px 90px rgba(15, 23, 42, .28);
+  box-shadow: 0 30px 90px rgba(15, 23, 42, 0.28);
 }
 
 .history-dialog::backdrop {
-  background: rgba(15, 23, 42, .58);
+  background: rgba(15, 23, 42, 0.58);
   backdrop-filter: blur(3px);
 }
 
@@ -123,9 +123,18 @@
   font-size: 8px;
 }
 
-.history-score.good { background: #eaf8f1; color: var(--success); }
-.history-score.caution { background: #fff7e6; color: #b27300; }
-.history-score.poor { background: #fff0f0; color: var(--critical); }
+.history-score.good {
+  background: #eaf8f1;
+  color: var(--success);
+}
+.history-score.caution {
+  background: #fff7e6;
+  color: #b27300;
+}
+.history-score.poor {
+  background: #fff0f0;
+  color: var(--critical);
+}
 
 .history-copy {
   min-width: 0;
@@ -134,7 +143,7 @@
 .history-copy h3 {
   margin: 0 0 5px;
   font-size: 14px;
-  letter-spacing: -.35px;
+  letter-spacing: -0.35px;
 }
 
 .history-copy p {

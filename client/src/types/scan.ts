@@ -19,6 +19,7 @@ export interface ScanResult {
   score: number
   summary: Record<Impact, number> & { total: number; passes: number }
   issues: ScanIssue[]
+  preview?: { dataUrl: string; width: number; height: number }
 }
 
 export type ScanKind = 'url' | 'before' | 'after' | 'local'

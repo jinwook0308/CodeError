@@ -17,6 +17,12 @@ export interface ScanIssue {
   exampleAfter: string;
 }
 
+export interface ScanPreview {
+  dataUrl: string;
+  width: number;
+  height: number;
+}
+
 export interface ScanResponse {
   success: true;
   url: string;
@@ -24,6 +30,7 @@ export interface ScanResponse {
   score: number;
   summary: Record<Impact, number> & { total: number; passes: number };
   issues: ScanIssue[];
+  preview?: ScanPreview;
 }
 
 export interface AccessibilityGuide {

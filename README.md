@@ -9,6 +9,7 @@ URL을 입력하면 서버가 Playwright Chromium으로 페이지를 열고 axe-
 
 - 프로토콜이 없는 URL의 `https://` 자동 보정
 - Playwright와 axe-core를 이용한 실제 단일 페이지 검사
+- Playwright가 검사 시점에 촬영한 1440×900 화면 미리보기와 확대·원본 페이지 열기
 - Critical, Serious, Moderate, Minor 심각도별 집계 및 필터
 - 주요 axe 규칙 25개의 초보자용 한국어 설명과 수정 코드 예시
 - 가이드가 없는 규칙의 axe-core 기반 fallback 안내
@@ -18,6 +19,7 @@ URL을 입력하면 서버가 Playwright Chromium으로 페이지를 열고 axe-
 - 실제 문제의 심각도와 영향 요소 수를 바탕으로 상위 3개 수정 우선순위 추천
 - 실제 검사 결과를 제목, Rule ID, WCAG 기준으로 검색하고 심각도·영향 요소·이름순으로 정렬
 - 실제 검사 결과를 현재 브라우저에 최대 10개까지 저장하고 이전 결과를 다시 여는 검사 기록
+- 개발 목적, 동작 과정, 오픈소스 구성과 로드맵을 설명하는 `/about` 프로젝트 소개 페이지
 - 잘못된 URL, 접속 실패, HTTPS 오류, 타임아웃의 사용자 친화적 처리
 - localhost, IP literal 및 DNS가 사설 IP로 해석되는 대상 차단
 - 사용자 PC에서 `localhost`, `127.0.0.1`, `::1` 화면을 검사하는 Local Runner CLI
@@ -144,9 +146,9 @@ npm run scan:local -- http://localhost:5173
 npm run scan:local -- localhost:5173
 ```
 
-검사가 끝나면 터미널에 참고 점수, 심각도별 개수, 통과 규칙, 문제 요소와 한국어 수정 가이드가 표시됩니다. 결과는 `server/.codeerror/latest-local-scan.json`에도 저장됩니다. CodeError 사이트에서 **로컬 검사 결과 열기** 버튼을 누르면 같은 결과를 기존 결과 UI에서 확인할 수 있습니다.
+검사가 끝나면 터미널에 참고 점수, 심각도별 개수, 통과 규칙, 문제 요소와 한국어 수정 가이드가 표시됩니다. 결과는 `server/.codeerror/latest-local-scan.json`에도 저장됩니다.
 
-이 경우 CodeError 사이트에서 **저장된 로컬 결과 열기**를 누르면 터미널 검사 결과도 다시 확인할 수 있습니다. Local Runner는 보안을 위해 `localhost`, `127.0.0.1`, `::1`만 허용합니다.
+Local Runner는 보안을 위해 `localhost`, `127.0.0.1`, `::1`만 허용합니다. 웹 화면에서는 입력창에 localhost 주소를 직접 입력해 검사할 수 있습니다.
 
 ## 수정 전·후 비교 시연
 
@@ -200,7 +202,8 @@ npm run build
 ## 현재 범위와 제한
 
 - 입력한 URL의 첫 페이지 하나만 검사합니다.
-- Local Runner 결과는 터미널과 웹 결과 UI에서 확인할 수 있으며 수정 전후 자동 비교는 다음 단계입니다.
+- 화면 미리보기는 현재 검사 결과에서만 제공하며 브라우저 검사 기록과 JSON 내보내기에는 큰 이미지 데이터를 저장하지 않습니다.
+- Local Runner 결과는 터미널과 저장된 JSON 파일에서 확인할 수 있으며 수정 전후 자동 비교는 다음 단계입니다.
 - 로그인, 데이터베이스, PDF, AI 수정, GitHub 연동은 구현하지 않았습니다.
 - axe-core 자동 검사는 수동 접근성 평가 전체를 대체하지 않습니다.
 - 리디렉션 및 하위 리소스 요청도 사설 주소를 차단하지만, 공개 DNS 환경과 네트워크 정책에 따라 접속 결과가 달라질 수 있습니다.

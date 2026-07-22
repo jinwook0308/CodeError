@@ -21,7 +21,7 @@ export function ScanForm({ url, loading, status, error, onUrlChange, onSubmit }:
       <div className={`url-control ${error ? 'has-error' : ''}`}>
         <span className="globe-icon" aria-hidden="true">◎</span>
         <input id="scan-url" type="text" inputMode="url" autoComplete="url" maxLength={2048}
-          placeholder="공개 URL 또는 localhost:5173을 입력하세요" value={url}
+          placeholder="공개 URL을 입력하세요" value={url}
           onChange={(event) => onUrlChange(event.target.value)} disabled={loading} />
         <button type="submit" disabled={loading || !url.trim()}>
           {loading ? <><span className="spinner" /> 검사 중</> : <>검사 시작 <span aria-hidden="true">→</span></>}

@@ -5,6 +5,7 @@ import type { Impact, ScanResponse } from "../types/scan.js";
 import { assertPublicHostname, normalizeUrl } from "./urlSafety.js";
 
 const impacts: Impact[] = ["critical", "serious", "moderate", "minor"];
+const previewViewport = { width: 1440, height: 900 };
 
 function wcagFromTags(tags: string[]): string[] {
   return tags
@@ -24,7 +25,7 @@ export async function scanWebsite(input: unknown, options: ScanOptions = {}): Pr
 
   try {
     browser = await chromium.launch({ headless: true });
-    const context = await browser.newContext({ ignoreHTTPSErrors: false });
+    const context = await browser.newContext({ ignoreHTTPSErrors: false, viewport: previewViewport });
     const checkedHosts = new Map<string, Promise<void>>();
     await context.route("**/*", async (route) => {
       const requestUrl = new URL(route.request().url());
@@ -41,6 +42,12 @@ export async function scanWebsite(input: unknown, options: ScanOptions = {}): Pr
       new AxeBuilder({ page }).analyze(),
       new Promise<never>((_, reject) => setTimeout(() => reject(new Error("검사 시간이 초과되었습니다.")), 15_000)),
     ]);
+    const previewBuffer = await page.screenshot({
+      type: "jpeg",
+      quality: 70,
+      fullPage: false,
+      animations: "disabled",
+    }).catch(() => null);
 
     const counts: Record<Impact, number> = { critical: 0, serious: 0, moderate: 0, minor: 0 };
     const issues = results.violations.map((violation) => {
@@ -67,6 +74,10 @@ export async function scanWebsite(input: unknown, options: ScanOptions = {}): Pr
       score,
       summary: { total: issues.length, ...counts, passes: results.passes.length },
       issues,
+      preview: previewBuffer ? {
+        dataUrl: `data:image/jpeg;base64,${previewBuffer.toString("base64")}`,
+        ...previewViewport,
+      } : undefined,
     };
   } finally {
     await browser?.close();

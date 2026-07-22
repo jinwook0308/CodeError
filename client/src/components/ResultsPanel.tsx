@@ -47,6 +47,7 @@ export function ResultsPanel({ result, onRescan, loading, rescanLabel = '다시 
   const [filter, setFilter] = useState<'all' | Impact>('all')
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortMode>('severity')
+  const [previewExpanded, setPreviewExpanded] = useState(false)
   const visibleIssues = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase('ko')
     const filteredIssues = result.issues.filter((issue) => {
@@ -85,6 +86,20 @@ export function ResultsPanel({ result, onRescan, loading, rescanLabel = '다시 
           <button type="button" className="rescan-button" onClick={onRescan} disabled={loading}><span aria-hidden="true">↻</span> {rescanLabel}</button>
         </div>
       </header>
+      {result.preview && (
+        <section className="scan-preview" aria-labelledby="scan-preview-title">
+          <div className="scan-preview-heading">
+            <div><span className="panel-label">검사 화면 미리보기</span><h3 id="scan-preview-title">Playwright가 실제로 확인한 화면</h3><p>검사를 시작한 시점의 데스크톱 화면입니다. 다음 단계에서 문제 위치 표시 기능이 추가될 예정입니다.</p></div>
+            <div className="scan-preview-actions">
+              <a href={result.url} target="_blank" rel="noreferrer">원본 페이지 열기 <span aria-hidden="true">↗</span></a>
+              <button type="button" onClick={() => setPreviewExpanded((expanded) => !expanded)} aria-expanded={previewExpanded}>{previewExpanded ? '작게 보기' : '크게 보기'}</button>
+            </div>
+          </div>
+          <div className={`scan-preview-frame ${previewExpanded ? 'expanded' : ''}`}>
+            <img src={result.preview.dataUrl} width={result.preview.width} height={result.preview.height} alt={`${resultTitle(result.url)} 검사 당시 화면 미리보기`} />
+          </div>
+        </section>
+      )}
       <div className="results-grid">
         <aside className="score-panel">
           <span className="panel-label">접근성 참고 점수</span>

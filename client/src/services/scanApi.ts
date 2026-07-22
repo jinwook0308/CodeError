@@ -21,10 +21,6 @@ export async function requestDemoScan(variant: 'before' | 'after'): Promise<Scan
   return request(`/api/scan/demo/${variant}`)
 }
 
-export async function requestLatestLocalScan(): Promise<ScanResult> {
-  return request('/api/scan/local/latest', undefined, 'GET')
-}
-
 async function request(endpoint: string, body?: { url: string }, method = 'POST'): Promise<ScanResult> {
   let response: Response
   try {

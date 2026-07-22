@@ -1,0 +1,108 @@
+.scan-preview {
+  padding: 25px 28px 29px;
+  border-bottom: 1px solid #e4e7ec;
+  background: #f7f8fc;
+}
+.scan-preview-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 17px;
+}
+.scan-preview-heading h3 {
+  margin: 5px 0 6px;
+  color: #172033;
+  font-size: 20px;
+  letter-spacing: -0.7px;
+}
+.scan-preview-heading p {
+  margin: 0;
+  color: #667085;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.scan-preview-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+.scan-preview-actions a,
+.scan-preview-actions button {
+  min-height: 38px;
+  padding: 0 13px;
+  border: 1px solid #d8dbe5;
+  border-radius: 8px;
+  background: #fff;
+  color: #475467;
+  font-size: 10px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+}
+.scan-preview-actions a {
+  display: inline-flex;
+  align-items: center;
+}
+.scan-preview-actions button {
+  border-color: #cfc5ff;
+  color: #5136d6;
+}
+.scan-preview-actions a:hover,
+.scan-preview-actions button:hover {
+  border-color: #8f7aff;
+  color: #5136d6;
+}
+.scan-preview-frame {
+  position: relative;
+  max-height: 390px;
+  overflow: hidden;
+  border: 1px solid #dfe3eb;
+  border-radius: 14px;
+  background: #e9ecf2;
+  box-shadow: 0 14px 32px rgba(16, 24, 40, 0.08);
+  transition: max-height 0.35s ease;
+}
+.scan-preview-frame:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 45px;
+  background: linear-gradient(transparent, rgba(15, 23, 42, 0.14));
+  pointer-events: none;
+}
+.scan-preview-frame.expanded {
+  max-height: none;
+  overflow: auto;
+}
+.scan-preview-frame.expanded:after {
+  display: none;
+}
+.scan-preview-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.scan-preview-frame:not(.expanded) img {
+  min-height: 390px;
+  object-fit: cover;
+  object-position: top;
+}
+@media (max-width: 850px) {
+  .scan-preview {
+    padding: 22px 18px;
+  }
+  .scan-preview-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .scan-preview-frame {
+    max-height: 330px;
+  }
+  .scan-preview-frame:not(.expanded) img {
+    min-height: 330px;
+  }
+}

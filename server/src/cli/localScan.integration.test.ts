@@ -28,5 +28,8 @@ test("로컬 HTTP 페이지를 실제 axe-core로 검사한다", { timeout: 30_0
   assert.equal(result.success, true);
   assert.equal(result.url, `http://127.0.0.1:${port}/`);
   assert.ok(result.issues.some((issue) => issue.id === "image-alt"));
+  assert.ok(result.preview?.dataUrl.startsWith("data:image/jpeg;base64,"));
+  assert.equal(result.preview?.width, 1440);
+  assert.equal(result.preview?.height, 900);
 });
 

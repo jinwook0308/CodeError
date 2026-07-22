@@ -28,9 +28,19 @@ function isScanResult(value: unknown): value is ScanResult {
   if (!Number.isFinite(Date.parse(value.scannedAt)) || !Number.isFinite(value.score)) return false
   const summary = value.summary
   if (!isObject(summary) || !Array.isArray(value.issues) || !value.issues.every(isScanIssue)) return false
+  if (value.preview !== undefined) {
+    if (!isObject(value.preview) || typeof value.preview.dataUrl !== 'string') return false
+    if (typeof value.preview.width !== 'number' || typeof value.preview.height !== 'number') return false
+  }
 
   const summaryKeys = [...impacts, 'total', 'passes']
   return summaryKeys.every((key) => typeof summary[key] === 'number' && Number.isFinite(summary[key]))
+}
+
+function resultWithoutPreview(result: ScanResult): ScanResult {
+  const compactResult = { ...result }
+  delete compactResult.preview
+  return compactResult
 }
 
 function isHistoryItem(value: unknown): value is ScanHistoryItem {
@@ -75,7 +85,7 @@ export function addScanHistory(result: ScanResult, kind: ScanKind): ScanHistoryI
   const item: ScanHistoryItem = {
     id: `${result.scannedAt}:${kind}`,
     kind,
-    result,
+    result: resultWithoutPreview(result),
   }
   const history = loadScanHistory().filter((saved) => saved.id !== item.id)
   return persistHistory([item, ...history])

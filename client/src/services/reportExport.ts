@@ -25,7 +25,9 @@ function download(content: string, type: string, fileName: string): void {
 }
 
 export function buildJsonReport(result: ScanResult): string {
-  return JSON.stringify(result, null, 2)
+  const report = { ...result }
+  delete report.preview
+  return JSON.stringify(report, null, 2)
 }
 
 export function buildHtmlReport(result: ScanResult): string {

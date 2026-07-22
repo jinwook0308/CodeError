@@ -82,7 +82,7 @@ async function main(): Promise<void> {
   console.log(`- 치명적 ${result.summary.critical} · 심각 ${result.summary.serious} · 보통 ${result.summary.moderate} · 경미 ${result.summary.minor}`);
   console.log(`- 통과 규칙: ${result.summary.passes}개`);
   console.log(`- 검사 시간: ${seconds}초`);
-  console.log("- 사이트 확인: CodeError에서 '로컬 검사 결과 열기' 버튼을 누르세요.");
+  console.log("- 저장 파일: server/.codeerror/latest-local-scan.json");
 
   if (!result.issues.length) {
     console.log("\n자동 검사에서 발견된 문제가 없습니다. 수동 접근성 검사도 함께 진행해주세요.");
